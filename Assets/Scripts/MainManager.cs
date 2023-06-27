@@ -18,13 +18,19 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
-    
+    public Text HighScoreText;
+    private int m_HighScore;
+    private string m_HighScorePlayer;
+
+
+
     // Start is called before the first frame update
     void Start()
     {
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
+
+
         int[] pointCountArray = new [] {1,1,2,2,5,5};
         for (int i = 0; i < LineCount; ++i)
         {
@@ -36,6 +42,10 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        m_HighScore = PlayerPrefs.GetInt("HighScore", 0);
+        m_HighScorePlayer = PlayerPrefs.GetString("HighScorePlayer", "Player");
+        UpdateHighScoreText();
     }
 
     private void Update()
@@ -57,15 +67,30 @@ public class MainManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                SceneManager.LoadScene(0);
             }
         }
+    }
+
+
+    void UpdateHighScoreText()
+    {
+        HighScoreText.text = $"High Score: {m_HighScorePlayer} = {m_HighScore}";
     }
 
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = $"Score: {m_Points}";
+
+        if (m_Points > m_HighScore)
+        {
+            m_HighScore = m_Points;
+            m_HighScorePlayer = PlayerPrefs.GetString("TextData", "Player"); // Retrieve the player name from "TextData" key
+            PlayerPrefs.SetInt("HighScore", m_HighScore);
+            PlayerPrefs.SetString("HighScorePlayer", m_HighScorePlayer);
+            UpdateHighScoreText();
+        }
     }
 
     public void GameOver()
@@ -73,4 +98,6 @@ public class MainManager : MonoBehaviour
         m_GameOver = true;
         GameOverText.SetActive(true);
     }
+
+
 }
